@@ -2352,7 +2352,7 @@
           </dl>
           <emu-alg>
             1. If _x_ is *0*<sub>ℤ</sub>, return *0*<sub>ℤ</sub>.
-            1. Return the BigInt value that represents the negation of ℝ(_x_).
+            1. Return -_x_.
           </emu-alg>
         </emu-clause>
 
@@ -2383,7 +2383,7 @@
           <emu-alg>
             1. If _exponent_ &lt; *0*<sub>ℤ</sub>, throw a *RangeError* exception.
             1. If _base_ is *0*<sub>ℤ</sub> and _exponent_ is *0*<sub>ℤ</sub>, return *1*<sub>ℤ</sub>.
-            1. Return the BigInt value that represents ℝ(_base_) raised to the power ℝ(_exponent_).
+            1. Return _base_ raised to the power _exponent_.
           </emu-alg>
         </emu-clause>
 
@@ -2397,7 +2397,7 @@
           <dl class="header">
           </dl>
           <emu-alg>
-            1. Return the BigInt value that represents the product of _x_ and _y_.
+            1. Return _x_ × _y_.
           </emu-alg>
           <emu-note>Even if the result has a much larger bit width than the input, the exact mathematical answer is given.</emu-note>
         </emu-clause>
@@ -2447,7 +2447,7 @@
           <dl class="header">
           </dl>
           <emu-alg>
-            1. Return the BigInt value that represents the sum of _x_ and _y_.
+            1. Return _x_ + _y_.
           </emu-alg>
         </emu-clause>
 
@@ -2461,7 +2461,7 @@
           <dl class="header">
           </dl>
           <emu-alg>
-            1. Return the BigInt value that represents the difference _x_ minus _y_.
+            1. Return _x_ - _y_.
           </emu-alg>
         </emu-clause>
 
@@ -2476,8 +2476,8 @@
           </dl>
           <emu-alg>
             1. If _y_ &lt; *0*<sub>ℤ</sub>, then
-              1. Return the BigInt value that represents ℝ(_x_) / 2<sup>-ℝ(_y_)</sup>, rounding down to the nearest integer, including for negative numbers.
-            1. Return the BigInt value that represents ℝ(_x_) × 2<sup>ℝ(_y_)</sup>.
+              1. Return ℤ(floor(ℝ(_x_) / 2<sup>-ℝ(_y_)</sup>)).
+            1. Return _x_ × *2*<sub>ℤ</sub><sup>_y_</sup>.
           </emu-alg>
           <emu-note>Semantics here should be equivalent to a bitwise shift, treating the BigInt as an infinite length string of binary two's complement digits.</emu-note>
         </emu-clause>
@@ -16836,7 +16836,7 @@
         </emu-alg>
         <emu-grammar>NumericLiteral :: NonDecimalIntegerLiteral BigIntLiteralSuffix</emu-grammar>
         <emu-alg>
-          1. Return the BigInt value that represents the MV of |NonDecimalIntegerLiteral|.
+          1. Return the BigInt value for the MV of |NonDecimalIntegerLiteral|.
         </emu-alg>
         <emu-grammar>DecimalBigIntegerLiteral :: `0` BigIntLiteralSuffix</emu-grammar>
         <emu-alg>
@@ -16844,7 +16844,7 @@
         </emu-alg>
         <emu-grammar>DecimalBigIntegerLiteral :: NonZeroDigit BigIntLiteralSuffix</emu-grammar>
         <emu-alg>
-          1. Return the BigInt value that represents the MV of |NonZeroDigit|.
+          1. Return the BigInt value for the MV of |NonZeroDigit|.
         </emu-alg>
         <emu-grammar>
           DecimalBigIntegerLiteral ::
@@ -18525,7 +18525,7 @@
         <h1>
           Static Semantics: TemplateStrings (
             _raw_: a Boolean,
-          ): a List of Strings
+          ): a List of either Strings or *undefined*
         </h1>
         <dl class="header">
         </dl>
@@ -18566,7 +18566,7 @@
           Static Semantics: TemplateString (
             _templateToken_: a |NoSubstitutionTemplate| Parse Node, a |TemplateHead| Parse Node, a |TemplateMiddle| Parse Node, or a |TemplateTail| Parse Node,
             _raw_: a Boolean,
-          ): a String
+          ): a String or *undefined*
         </h1>
         <dl class="header">
         </dl>
@@ -18577,6 +18577,9 @@
             1. Let _string_ be the TV of _templateToken_.
           1. Return _string_.
         </emu-alg>
+        <emu-note>
+          <p>This operation returns *undefined* if _raw_ is *false* and _templateToken_ contains a |NotEscapeSequence|. In all other cases, it returns a String.</p>
+        </emu-note>
       </emu-clause>
 
       <emu-clause id="sec-gettemplateobject" type="abstract operation">
@@ -18594,6 +18597,7 @@
             1. If _e_.[[Site]] is the same Parse Node as _templateLiteral_, then
               1. Return _e_.[[Array]].
           1. Let _rawStrings_ be TemplateStrings of _templateLiteral_ with argument *true*.
+          1. Assert: _rawStrings_ is a List of Strings.
           1. Let _cookedStrings_ be TemplateStrings of _templateLiteral_ with argument *false*.
           1. Let _count_ be the number of elements in the List _cookedStrings_.
           1. Assert: _count_ ≤ 2<sup>32</sup> - 1.
@@ -25430,6 +25434,7 @@
 
         CallExpression :
           SuperCall
+          ImportCall
           CallExpression `[` Expression `]`
           CallExpression `.` IdentifierName
           CallExpression `.` PrivateIdentifier
@@ -28856,7 +28861,6 @@
                   1. If _fnDefinable_ is *false*, throw a *TypeError* exception.
                 1. Append _fn_ to _declaredFunctionNames_.
                 1. Insert _d_ as the first element of _functionsToInitialize_.
-          1. [id="step-evaldeclarationinstantiation-web-compat-insertion-point"] NOTE: Annex <emu-xref href="#sec-web-compat-evaldeclarationinstantiation"></emu-xref> adds additional steps at this point.
           1. Let _declaredVarNames_ be a new empty List.
           1. For each element _d_ of _varDeclarations_, do
             1. If _d_ is either a |VariableDeclaration|, a |ForBinding|, or a |BindingIdentifier|, then
@@ -28867,6 +28871,7 @@
                     1. If _vnDefinable_ is *false*, throw a *TypeError* exception.
                   1. If _declaredVarNames_ does not contain _vn_, then
                     1. Append _vn_ to _declaredVarNames_.
+          1. [id="step-evaldeclarationinstantiation-web-compat-insertion-point"] NOTE: Annex <emu-xref href="#sec-web-compat-evaldeclarationinstantiation"></emu-xref> adds additional steps at this point.
           1. [id="step-evaldeclarationinstantiation-post-validation"] NOTE: No abnormal terminations occur after this algorithm step unless _varEnv_ is a Global Environment Record and the global object is a Proxy exotic object.
           1. Let _lexDeclarations_ be the LexicallyScopedDeclarations of _body_.
           1. For each element _d_ of _lexDeclarations_, do
@@ -29415,7 +29420,6 @@
           1. If _value_ is either *undefined* or *null*, return OrdinaryObjectCreate(%Object.prototype%).
           1. Return ! ToObject(_value_).
         </emu-alg>
-        <p>The *"length"* property of this function is *1*<sub>𝔽</sub>.</p>
       </emu-clause>
     </emu-clause>
 
@@ -29424,7 +29428,7 @@
       <p>The Object constructor:</p>
       <ul>
         <li>has a [[Prototype]] internal slot whose value is %Function.prototype%.</li>
-        <li>has a *"length"* property.</li>
+        <li>has a *"length"* property whose value is *1*<sub>𝔽</sub>.</li>
         <li>has the following additional properties:</li>
       </ul>
 
@@ -30063,13 +30067,9 @@
       <ul>
         <li>is itself a built-in function object.</li>
         <li>has a [[Prototype]] internal slot whose value is %Function.prototype%.</li>
+        <li oldids="sec-function.length">has a *"length"* property whose value is *1*<sub>𝔽</sub>.</li>
         <li>has the following properties:</li>
       </ul>
-
-      <emu-clause id="sec-function.length">
-        <h1>Function.length</h1>
-        <p>This is a data property with a value of 1. This property has the attributes { [[Writable]]: *false*, [[Enumerable]]: *false*, [[Configurable]]: *true* }.</p>
-      </emu-clause>
 
       <emu-clause id="sec-function.prototype">
         <h1>Function.prototype</h1>
@@ -31354,7 +31354,7 @@
           </dl>
           <emu-alg>
             1. If IsIntegralNumber(_number_) is *false*, throw a *RangeError* exception.
-            1. Return the BigInt value that represents ℝ(_number_).
+            1. Return ℤ(ℝ(_number_)).
           </emu-alg>
         </emu-clause>
       </emu-clause>
@@ -31385,7 +31385,7 @@
         <emu-alg>
           1. Set _bits_ to ? ToIndex(_bits_).
           1. Set _bigint_ to ? ToBigInt(_bigint_).
-          1. Return the BigInt value that represents ℝ(_bigint_) modulo 2<sup>_bits_</sup>.
+          1. Return ℤ(ℝ(_bigint_) modulo 2<sup>_bits_</sup>).
         </emu-alg>
       </emu-clause>
 
@@ -32343,7 +32343,6 @@
         <emu-alg>
           1. If the implementation only supports the UTC time zone, return *"UTC"*.
           1. Let _systemTimeZoneString_ be the String representing the host environment's current time zone, either a primary time zone identifier or an offset time zone identifier.
-          1. If IsTimeZoneOffsetString(_systemTimeZoneString_) is *true*, return _systemTimeZoneString_.
           1. Return _systemTimeZoneString_.
         </emu-alg>
 
@@ -32892,7 +32891,6 @@ THH:mm:ss.sss
         <li>returns a String representing the current time (UTC) when called as a function rather than as a constructor.</li>
         <li>is a function whose behaviour differs based upon the number and types of its arguments.</li>
         <li>may be used as the value of an `extends` clause of a class definition. Subclass constructors that intend to inherit the specified Date behaviour must include a `super` call to the Date constructor to create and initialize the subclass instance with a [[DateValue]] internal slot.</li>
-        <li>has a *"length"* property whose value is *7*<sub>𝔽</sub>.</li>
       </ul>
 
       <emu-clause id="sec-date" oldids="sec-date-constructor-date,sec-date-value,sec-date-year-month-date-hours-minutes-seconds-ms">
@@ -32941,6 +32939,7 @@ THH:mm:ss.sss
       <p>The Date constructor:</p>
       <ul>
         <li>has a [[Prototype]] internal slot whose value is %Function.prototype%.</li>
+        <li>has a *"length"* property whose value is *7*<sub>𝔽</sub>.</li>
         <li>has the following properties:</li>
       </ul>
 
@@ -36384,7 +36383,7 @@ THH:mm:ss.sss
               1. Let _m1_ be CharacterSetMatcher(_rer_, _cs1_, *false*, _direction_).
               1. Set _m2_ to MatchSequence(_m1_, _m2_, _direction_).
             1. Append _m2_ to _lm_.
-          1. Let _singles_ be the CharSet containing every CharSetElement of _cs_ which consists of a single character.
+          1. Let _singles_ be the CharSet containing every CharSetElement of _cs_ that consists of a single character.
           1. Append CharacterSetMatcher(_rer_, _singles_, *false*, _direction_) to _lm_.
           1. If _cs_ contains the empty sequence of characters, append EmptyMatcher() to _lm_.
           1. Let _m2_ be the last Matcher in _lm_.
@@ -36445,9 +36444,9 @@ THH:mm:ss.sss
         <emu-grammar>AtomEscape :: CharacterClassEscape</emu-grammar>
         <emu-alg>
           1. Let _cs_ be CompileToCharSet of |CharacterClassEscape| with argument _rer_.
-          1. If _rer_.[[UnicodeSets]] is *false*, or if every element of _cs_ consists of a single character (including if _cs_ is empty), return CharacterSetMatcher(_rer_, _cs_, *false*, _direction_).
+          1. If _rer_.[[UnicodeSets]] is *false*, or if every CharSetElement of _cs_ consists of a single character (including if _cs_ is empty), return CharacterSetMatcher(_rer_, _cs_, *false*, _direction_).
           1. Let _lm_ be an empty List of Matchers.
-          1. For each string _s_ in _cs_ whose length is greater than 1, iterating in descending order of string length, do
+          1. For each CharSetElement _s_ in _cs_ containing more than 1 character, iterating in descending order of length, do
             1. Let _cs2_ be a one-element CharSet containing the last code point of _s_.
             1. Let _m2_ be CharacterSetMatcher(_rer_, _cs2_, *false*, _direction_).
             1. For each code point _c1_ in _s_, iterating backwards from its second-to-last code point, do
@@ -36455,7 +36454,7 @@ THH:mm:ss.sss
               1. Let _m1_ be CharacterSetMatcher(_rer_, _cs1_, *false*, _direction_).
               1. Set _m2_ to MatchSequence(_m1_, _m2_, _direction_).
             1. Append _m2_ to _lm_.
-          1. Let _singles_ be the CharSet containing every element of _cs_ which consists of a single character.
+          1. Let _singles_ be the CharSet containing every CharSetElement of _cs_ that consists of a single character.
           1. Append CharacterSetMatcher(_rer_, _singles_, *false*, _direction_) to _lm_.
           1. If _cs_ contains the empty sequence of characters, append EmptyMatcher() to _lm_.
           1. Let _m2_ be the last Matcher in _lm_.
@@ -36486,8 +36485,8 @@ THH:mm:ss.sss
           <emu-alg>
             1. If _rer_.[[UnicodeSets]] is *true*, then
               1. Assert: _invert_ is *false*.
-              1. Assert: Every element of _A_ consists of a single character.
-            1. Return a new Matcher with parameters (_x_, _c_) that captures _rer_, _invert_, and _direction_ and performs the following steps when called:
+              1. Assert: Every CharSetElement of _A_ consists of a single character.
+            1. Return a new Matcher with parameters (_x_, _c_) that captures _rer_, _A_, _invert_, and _direction_ and performs the following steps when called:
               1. Assert: _x_ is a MatchState.
               1. Assert: _c_ is a MatcherContinuation.
               1. Let _Input_ be _x_'s _input_.
@@ -36777,13 +36776,13 @@ THH:mm:ss.sss
         <emu-alg>
           1. Let _A_ be CompileToCharSet of the first |ClassSetOperand| with argument _rer_.
           1. Let _B_ be CompileToCharSet of the second |ClassSetOperand| with argument _rer_.
-          1. Return the CharSet containing the elements of _A_ which are not also elements of _B_.
+          1. Return the CharSet containing the CharSetElements of _A_ which are not also CharSetElements of _B_.
         </emu-alg>
         <emu-grammar>ClassSubtraction :: ClassSubtraction `--` ClassSetOperand</emu-grammar>
         <emu-alg>
           1. Let _A_ be CompileToCharSet of the |ClassSubtraction| with argument _rer_.
           1. Let _B_ be CompileToCharSet of the |ClassSetOperand| with argument _rer_.
-          1. Return the CharSet containing the elements of _A_ which are not also elements of _B_.
+          1. Return the CharSet containing the CharSetElements of _A_ which are not also CharSetElements of _B_.
         </emu-alg>
 
         <!-- ClassSetRange -->
@@ -36972,7 +36971,7 @@ THH:mm:ss.sss
           </dl>
           <emu-alg>
             1. Let _A_ be AllCharacters(_rer_).
-            1. Return the CharSet containing the elements of _A_ which are not also elements of _S_.
+            1. Return the CharSet containing the CharSetElements of _A_ which are not also CharSetElements of _S_.
           </emu-alg>
         </emu-clause>
 
@@ -37052,7 +37051,7 @@ THH:mm:ss.sss
         <emu-grammar>NonEmptyClassString :: ClassSetCharacter NonEmptyClassString?</emu-grammar>
         <emu-alg>
           1. Let _cs_ be CompileToCharSet of |ClassSetCharacter| with argument _rer_.
-          1. Let _s1_ be the sequence of characters that is the single element of _cs_.
+          1. Let _s1_ be the sequence of characters that is the single CharSetElement of _cs_.
           1. If |NonEmptyClassString| is present, then
             1. Let _s2_ be CompileClassSetString of |NonEmptyClassString| with argument _rer_.
             1. Return the concatenation of _s1_ and _s2_.
@@ -38019,7 +38018,6 @@ THH:mm:ss.sss
         <li>also creates and initializes a new Array when called as a function rather than as a constructor. Thus the function call `Array(…)` is equivalent to the object creation expression `new Array(…)` with the same arguments.</li>
         <li>is a function whose behaviour differs based upon the number and types of its arguments.</li>
         <li>may be used as the value of an `extends` clause of a class definition. Subclass constructors that intend to inherit the exotic Array behaviour must include a `super` call to the Array constructor to initialize subclass instances that are Array exotic objects. However, most of the `Array.prototype` methods are generic methods that are not dependent upon their *this* value being an Array exotic object.</li>
-        <li>has a *"length"* property whose value is *1*<sub>𝔽</sub>.</li>
       </ul>
 
       <emu-clause id="sec-array" oldids="sec-array-constructor-array,sec-array-len,sec-array-items">
@@ -38062,6 +38060,7 @@ THH:mm:ss.sss
       <p>The Array constructor:</p>
       <ul>
         <li>has a [[Prototype]] internal slot whose value is %Function.prototype%.</li>
+        <li>has a *"length"* property whose value is *1*<sub>𝔽</sub>.</li>
         <li>has the following properties:</li>
       </ul>
 
@@ -39639,7 +39638,7 @@ THH:mm:ss.sss
             <dfn>%Uint8ClampedArray%</dfn>
           </td>
           <td>
-            ~Uint8C~
+            ~Uint8Clamped~
           </td>
           <td>
             1
@@ -40907,7 +40906,6 @@ THH:mm:ss.sss
         <li>is a function whose behaviour differs based upon the number and types of its arguments. The actual behaviour of a call of _TypedArray_ depends upon the number and kind of arguments that are passed to it.</li>
         <li>is not intended to be called as a function and will throw an exception when called in that manner.</li>
         <li>may be used as the value of an `extends` clause of a class definition. Subclass constructors that intend to inherit the specified _TypedArray_ behaviour must include a `super` call to the _TypedArray_ constructor to create and initialize the subclass instance with the internal state necessary to support the %TypedArray%`.prototype` built-in methods.</li>
-        <li>has a *"length"* property whose value is *3*<sub>𝔽</sub>.</li>
       </ul>
 
       <emu-clause id="sec-typedarray" oldids="sec-typedarray-length,sec-typedarray-object">
@@ -41128,6 +41126,7 @@ THH:mm:ss.sss
       <p>Each _TypedArray_ constructor:</p>
       <ul>
         <li>has a [[Prototype]] internal slot whose value is %TypedArray%.</li>
+        <li>has a *"length"* property whose value is *3*<sub>𝔽</sub>.</li>
         <li>has a *"name"* property whose value is the String value of the constructor name specified for it in <emu-xref href="#table-the-typedarray-constructors"></emu-xref>.</li>
         <li>has the following properties:</li>
       </ul>
@@ -42191,7 +42190,7 @@ THH:mm:ss.sss
           <dd>It verifies if the argument _type_ is an unsigned TypedArray element type.</dd>
         </dl>
         <emu-alg>
-          1. If _type_ is one of ~Uint8~, ~Uint8C~, ~Uint16~, ~Uint32~, or ~BigUint64~, return *true*.
+          1. If _type_ is one of ~Uint8~, ~Uint8Clamped~, ~Uint16~, ~Uint32~, or ~BigUint64~, return *true*.
           1. Return *false*.
         </emu-alg>
       </emu-clause>
@@ -42204,7 +42203,7 @@ THH:mm:ss.sss
         </h1>
         <dl class="header">
           <dt>description</dt>
-          <dd>It verifies if the argument _type_ is an Integer TypedArray element type not including ~Uint8C~.</dd>
+          <dd>It verifies if the argument _type_ is an Integer TypedArray element type not including ~Uint8Clamped~.</dd>
         </dl>
         <emu-alg>
           1. If _type_ is one of ~Int8~, ~Uint8~, ~Int16~, ~Uint16~, ~Int32~, or ~Uint32~, return *true*.
@@ -46209,14 +46208,10 @@ THH:mm:ss.sss
       <ul>
         <li>is a standard built-in function object that inherits from the Function constructor.</li>
         <li>has a [[Prototype]] internal slot whose value is %Function%.</li>
+        <li oldids="sec-generatorfunction.length">has a *"length"* property whose value is *1*<sub>𝔽</sub>.</li>
         <li>has a *"name"* property whose value is *"GeneratorFunction"*.</li>
         <li>has the following properties:</li>
       </ul>
-
-      <emu-clause id="sec-generatorfunction.length">
-        <h1>GeneratorFunction.length</h1>
-        <p>This is a data property with a value of 1. This property has the attributes { [[Writable]]: *false*, [[Enumerable]]: *false*, [[Configurable]]: *true* }.</p>
-      </emu-clause>
 
       <emu-clause id="sec-generatorfunction.prototype">
         <h1>GeneratorFunction.prototype</h1>
@@ -46315,14 +46310,10 @@ THH:mm:ss.sss
       <ul>
         <li>is a standard built-in function object that inherits from the Function constructor.</li>
         <li>has a [[Prototype]] internal slot whose value is %Function%.</li>
+        <li oldids="sec-asyncgeneratorfunction-length">has a *"length"* property whose value is *1*<sub>𝔽</sub>.</li>
         <li>has a *"name"* property whose value is *"AsyncGeneratorFunction"*.</li>
         <li>has the following properties:</li>
       </ul>
-
-      <emu-clause id="sec-asyncgeneratorfunction-length">
-        <h1>AsyncGeneratorFunction.length</h1>
-        <p>This is a data property with a value of 1. This property has the attributes { [[Writable]]: *false*, [[Enumerable]]: *false*, [[Configurable]]: *true* }.</p>
-      </emu-clause>
 
       <emu-clause id="sec-asyncgeneratorfunction-prototype">
         <h1>AsyncGeneratorFunction.prototype</h1>
@@ -47168,14 +47159,10 @@ THH:mm:ss.sss
       <ul>
         <li>is a standard built-in function object that inherits from the Function constructor.</li>
         <li>has a [[Prototype]] internal slot whose value is %Function%.</li>
+        <li oldids="sec-async-function-constructor-length">has a *"length"* property whose value is *1*<sub>𝔽</sub>.</li>
         <li>has a *"name"* property whose value is *"AsyncFunction"*.</li>
         <li>has the following properties:</li>
       </ul>
-
-      <emu-clause id="sec-async-function-constructor-length">
-        <h1>AsyncFunction.length</h1>
-        <p>This is a data property with a value of 1. This property has the attributes { [[Writable]]: *false*, [[Enumerable]]: *false*, [[Configurable]]: *true* }.</p>
-      </emu-clause>
 
       <emu-clause id="sec-async-function-constructor-prototype">
         <h1>AsyncFunction.prototype</h1>
@@ -49445,7 +49432,7 @@ THH:mm:ss.sss
               1. Let _F_ be StringValue of the |BindingIdentifier| of _f_.
               1. If replacing the |FunctionDeclaration| _f_ with a |VariableStatement| that has _F_ as a |BindingIdentifier| would not produce any Early Errors for _func_ and _parameterNames_ does not contain _F_, then
                 1. NOTE: A var binding for _F_ is only instantiated here if it is neither a VarDeclaredName, the name of a formal parameter, or another |FunctionDeclaration|.
-                1. If _initializedBindings_ does not contain _F_ and _F_ is not *"arguments"*, then
+                1. If _instantiatedVarNames_ does not contain _F_ and _F_ is not *"arguments"*, then
                   1. Perform ! _varEnv_.CreateMutableBinding(_F_, *false*).
                   1. Perform ! _varEnv_.InitializeBinding(_F_, *undefined*).
                   1. Append _F_ to _instantiatedVarNames_.
